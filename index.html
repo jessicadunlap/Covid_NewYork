@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Covid-19 New York</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v3.3.0/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.3.0/mapbox.css'rel='stylesheet' />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: whitesmoke;
+            font-family: Lato, sans-serif;
+            color: #0D0000;
+        }
+        header {
+            padding: 6px 10%;
+        }
+        h1 {
+            margin-right: 20px;
+            text-align: center;
+            color: #001323;
+            font-size: 10mm;
+        }
+        h2 {
+            display: inline-block;
+            color: #001323;
+            font-size: 3mm;
+        }
+        #map {
+            width: 80%;
+            height: 540px;
+            margin: 10px auto;
+        }
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
+        p {
+            font-size: 1em;
+            color: #001323;
+        }
+        .map-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.8);
+            margin-right: 20px;
+            font-family: Arial, sans-serif;
+            overflow: auto;
+            border-radius: 3px;
+        }
+        #features {
+            top: 0;
+            height: 100px;
+            margin-top: 20px;
+            width: 250px;
+        }
+        #legend {
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            line-height: 18px;
+            height: 150px;
+            margin-bottom: 40px;
+            width: 150px;
+        }
+        .legend-key {
+            display: inline-block;
+            border-radius: 20%;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            }
+
+    </style>
+</head>
+
+<body>
+    <header>
+    <h1>Covid-19 Cases in New York</h1>
+    </header>
+
+    <div id='map'></div>
+<div class='map-overlay' id='legend'><h2>Confirmed Cases of Covid-19 in New York</h2></div>
+    
+    <footer>
+        <p>Map authored by Jessica Dunlap</p>
+        <p>Scroll your mouse over a circle and click to see the name of the countty and total number of tests. The data was last updated on April 25th 2020. For more information on the Covid-19 Pandemic, please visit the World Health Organization's site.</p>
+    </footer>
+
+    <script src="nytestapril.json"></script>
+    <script>
+
+    L.mapbox.accessToken = 'pk.eyJ1IjoiamVzc2ljYS1kdW5sYXAiLCJhIjoiY2s3djB3cHo2MDdiMzNscDVxNDMxMnZheiJ9.EJZDgcNctuJo5Qy8JmnR5w';  
+        
+    var map = L.map('map').setView([42.707354,-75.512942],7).addLayer(L.mapbox.styleLayer('mapbox://styles/jessica-dunlap/ck9kg3poe0vln1ilhnebkniml'));
+      
+        
+var testLayer = L.geoJson(nytest, {
+          pointToLayer: function(feature,coordinates) {
+              return L.circleMarker(coordinates, {
+                 color: 'orange',
+                 weight: 2,
+                 fillColor: 'yellow',
+                 fillOpacity: .5,
+                 radius: getRadius(feature.properties.ny_cumulated_tests_total)});
+          },
+      filter : function(feature) {          if(feature.properties.STATEFP){
+                  return feature;
+              }
+          },
+         style: function(feature) {
+             return {
+                 color: 'yellow',
+                 fillColor: 'yellow',
+                 radius: getRadius(feature.properties.ny_cumulated_tests_total)
+             }
+         },
+            onEachFeature : function(feature,layer) {
+    layer.on('mouseover', function() {
+    layer.setStyle({
+        fillColor: 'red'
+    });
+});
+layer.on('mouseout', function() { 
+    layer.setStyle({
+        fillColor: 'yellow'
+    });
+});    
+ var popup = ("<b style='color: #54278f'>Total Number of Tests: </b>"+feature.properties.ny_cumulated_tests_total+"<br><b style = 'color: #54278f'>County: </b>"+feature.properties.NAME)
+                       layer.bindPopup(popup)
+          }
+      }).addTo(map);
+    
+        function getRadius(val){
+        var radius = Math.sqrt(val) * 0.04;
+        return radius    
+    };
+        
+var layers = ['0-50', '50-200', '200-800', '800-1000', '1000+'];
+var colors = ['#F2f0f7', '#dadaeb', '#bcbddc', '#9e9ac8', '#756bb1', '#54278f'];
+        
+for (i = 0; i < layers.length; i++) {
+  var layer = layers[i];
+  var color = colors[i];
+  var item = document.createElement('div');
+  var key = document.createElement('span');
+  key.className = 'legend-key';
+  key.style.backgroundColor = color;
+
+  var value = document.createElement('span');
+  value.innerHTML = layer;
+  item.appendChild(key);
+  item.appendChild(value);
+  legend.appendChild(item);
+}; 
+        
+    </script>
+    
+</body>
+
+</html>
